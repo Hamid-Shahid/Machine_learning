@@ -1,0 +1,911 @@
+query SearchQuery(
+  $query: String!,
+  $pagingOptions: SearchPagingOptions!,
+  $searchInCollection: Boolean!,
+  $collectionDomainOrSlug: String!,
+  $withUsers: Boolean!,
+  $withTags: Boolean!,
+  $withPosts: Boolean!,
+  $withCollections: Boolean!,
+  $withLists: Boolean!,
+  $peopleSearchOptions: SearchOptions,
+  $postsSearchOptions: SearchOptions,
+  $tagsSearchOptions: SearchOptions,
+  $publicationsSearchOptions: SearchOptions,
+  $listsSearchOptions: SearchOptions
+) {
+  search(query: $query) @skip(if: $searchInCollection) {
+    __typename
+    ...Search_search
+  }
+  searchInCollection(
+    query: $query,
+    domainOrSlug: $collectionDomainOrSlug
+  ) @include(if: $searchInCollection) {
+    __typename
+    ...Search_search
+  }
+}
+
+fragment Search_search on Search {
+  people(
+    pagingOptions: $pagingOptions,
+    algoliaOptions: $peopleSearchOptions
+  ) @include(if: $withUsers) {
+    ... on SearchPeople {
+      pagingInfo {
+        next {
+          limit
+          page
+          __typename
+        }
+        __typename
+      }
+      ...SearchPeople_people
+      __typename
+    }
+    __typename
+  }
+  tags(
+    pagingOptions: $pagingOptions,
+    algoliaOptions: $tagsSearchOptions
+  ) @include(if: $withTags) {
+    ... on SearchTag {
+      pagingInfo {
+        next {
+          limit
+          page
+          __typename
+        }
+        __typename
+      }
+      ...SearchTags_tags
+      __typename
+    }
+    __typename
+  }
+  posts(
+    pagingOptions: $pagingOptions,
+    algoliaOptions: $postsSearchOptions
+  ) @include(if: $withPosts) {
+    ... on SearchPost {
+      pagingInfo {
+        next {
+          limit
+          page
+          __typename
+        }
+        __typename
+      }
+      ...SearchPosts_posts
+      __typename
+    }
+    __typename
+  }
+  collections(
+    pagingOptions: $pagingOptions,
+    algoliaOptions: $publicationsSearchOptions
+  ) @include(if: $withCollections) {
+    ... on SearchCollection {
+      pagingInfo {
+        next {
+          limit
+          page
+          __typename
+        }
+        __typename
+      }
+      ...SearchCollections_collections
+      __typename
+    }
+    __typename
+  }
+  catalogs(
+    pagingOptions: $pagingOptions,
+    algoliaOptions: $listsSearchOptions
+  ) @include(if: $withLists) {
+    ... on SearchCatalog {
+      pagingInfo {
+        next {
+          limit
+          page
+          __typename
+        }
+        __typename
+      }
+      ...SearchLists_catalogs
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SearchPeople_people on SearchPeople {
+  items {
+    __typename
+    ... on User {
+      algoliaObjectId
+      __typename
+      id
+    }
+    ...UserFollowInline_user
+  }
+  queryId
+  __typename
+}
+
+fragment UserFollowInline_user on User {
+  id
+  name
+  bio
+  mediumMemberAt
+  ...UserAvatar_user
+  ...UserFollowButton_user
+  ...userUrl_user
+  ...useIsVerifiedBookAuthor_user
+  __typename
+}
+
+fragment UserAvatar_user on User {
+  __typename
+  id
+  imageId
+  mediumMemberAt
+  membership {
+    tier
+    __typename
+    id
+  }
+  name
+  username
+  ...userUrl_user
+}
+
+fragment userUrl_user on User {
+  __typename
+  id
+  customDomainState {
+    live {
+      domain
+      __typename
+    }
+    __typename
+  }
+  hasSubdomain
+  username
+}
+
+fragment UserFollowButton_user on User {
+  ...UserFollowButtonSignedIn_user
+  ...UserFollowButtonSignedOut_user
+  __typename
+  id
+}
+
+fragment UserFollowButtonSignedIn_user on User {
+  id
+  name
+  __typename
+}
+
+fragment UserFollowButtonSignedOut_user on User {
+  id
+  ...SusiClickable_user
+  __typename
+}
+
+fragment SusiClickable_user on User {
+  ...SusiContainer_user
+  __typename
+  id
+}
+
+fragment SusiContainer_user on User {
+  ...SignInOptions_user
+  ...SignUpOptions_user
+  __typename
+  id
+}
+
+fragment SignInOptions_user on User {
+  id
+  name
+  __typename
+}
+
+fragment SignUpOptions_user on User {
+  id
+  name
+  __typename
+}
+
+fragment useIsVerifiedBookAuthor_user on User {
+  verifications {
+    isBookAuthor
+    __typename
+  }
+  __typename
+  id
+}
+
+fragment SearchTags_tags on SearchTag {
+  items {
+    id
+    algoliaObjectId
+    ...TopicPill_tag
+    __typename
+  }
+  queryId
+  __typename
+}
+
+fragment TopicPill_tag on Tag {
+  __typename
+  id
+  displayTitle
+  normalizedTagSlug
+}
+
+fragment SearchPosts_posts on SearchPost {
+  items {
+    id
+    algoliaObjectId
+    ...StreamPostPreview_post
+    __typename
+  }
+  queryId
+  __typename
+}
+
+fragment StreamPostPreview_post on Post {
+  id
+  ...StreamPostPreviewContent_post
+  ...PostPreviewContainer_post
+  __typename
+}
+
+fragment StreamPostPreviewContent_post on Post {
+  id
+  title
+  previewImage {
+    id
+    __typename
+  }
+  extendedPreviewContent {
+    subtitle
+    __typename
+  }
+  ...StreamPostPreviewImage_post
+  ...PostPreviewFooter_post
+  ...PostPreviewByLine_post
+  ...PostPreviewInformation_post
+  __typename
+}
+
+fragment StreamPostPreviewImage_post on Post {
+  title
+  previewImage {
+    ...StreamPostPreviewImage_imageMetadata
+    __typename
+    id
+  }
+  __typename
+  id
+}
+
+fragment StreamPostPreviewImage_imageMetadata on ImageMetadata {
+  id
+  focusPercentX
+  focusPercentY
+  alt
+  __typename
+}
+
+fragment PostPreviewFooter_post on Post {
+  isLocked
+  ...PostPreviewFooterSocial_post
+  ...PostPreviewFooterMenu_post
+  ...usePostPublishedAt_post
+  __typename
+  id
+}
+
+fragment PostPreviewFooterSocial_post on Post {
+  id
+  ...MultiVote_post
+  allowResponses
+  isLimitedState
+  postResponses {
+    count
+    __typename
+  }
+  __typename
+}
+
+fragment MultiVote_post on Post {
+  id
+  creator {
+    id
+    ...SusiClickable_user
+    __typename
+  }
+  isPublished
+  ...SusiClickable_post
+  collection {
+    id
+    slug
+    __typename
+  }
+  isLimitedState
+  ...MultiVoteCount_post
+  __typename
+}
+
+fragment SusiClickable_post on Post {
+  id
+  mediumUrl
+  ...SusiContainer_post
+  __typename
+}
+
+fragment SusiContainer_post on Post {
+  id
+  __typename
+}
+
+fragment MultiVoteCount_post on Post {
+  id
+  __typename
+}
+
+fragment PostPreviewFooterMenu_post on Post {
+  creator {
+    __typename
+    id
+  }
+  collection {
+    __typename
+    id
+  }
+  ...BookmarkButton_post
+  ...OverflowMenuButton_post
+  __typename
+  id
+}
+
+fragment BookmarkButton_post on Post {
+  visibility
+  ...SusiClickable_post
+  ...AddToCatalogBookmarkButton_post
+  __typename
+  id
+}
+
+fragment AddToCatalogBookmarkButton_post on Post {
+  ...AddToCatalogBase_post
+  __typename
+  id
+}
+
+fragment AddToCatalogBase_post on Post {
+  id
+  isPublished
+  ...SusiClickable_post
+  __typename
+}
+
+fragment OverflowMenuButton_post on Post {
+  id
+  visibility
+  ...OverflowMenu_post
+  __typename
+}
+
+fragment OverflowMenu_post on Post {
+  id
+  creator {
+    id
+    __typename
+  }
+  collection {
+    id
+    __typename
+  }
+  ...OverflowMenuItemUndoClaps_post
+  ...AddToCatalogBase_post
+  ...ExplicitSignalMenuOptions_post
+  __typename
+}
+
+fragment OverflowMenuItemUndoClaps_post on Post {
+  id
+  clapCount
+  ...ClapMutation_post
+  __typename
+}
+
+fragment ClapMutation_post on Post {
+  __typename
+  id
+  clapCount
+  ...MultiVoteCount_post
+}
+
+fragment ExplicitSignalMenuOptions_post on Post {
+  ...NegativeSignalModal_post
+  __typename
+  id
+}
+
+fragment NegativeSignalModal_post on Post {
+  id
+  creator {
+    ...NegativeSignalModal_publisher
+    viewerEdge {
+      id
+      isMuting
+      __typename
+    }
+    __typename
+    id
+  }
+  collection {
+    ...NegativeSignalModal_publisher
+    viewerEdge {
+      id
+      isMuting
+      __typename
+    }
+    __typename
+    id
+  }
+  __typename
+}
+
+fragment NegativeSignalModal_publisher on Publisher {
+  __typename
+  id
+  name
+}
+
+fragment usePostPublishedAt_post on Post {
+  firstPublishedAt
+  latestPublishedAt
+  pinnedAt
+  __typename
+  id
+}
+
+fragment PostPreviewByLine_post on Post {
+  id
+  creator {
+    ...PostPreviewByLine_user
+    __typename
+    id
+  }
+  collection {
+    ...PostPreviewByLine_collection
+    __typename
+    id
+  }
+  ...CardByline_post
+  __typename
+}
+
+fragment PostPreviewByLine_user on User {
+  id
+  __typename
+  ...CardByline_user
+  ...ExpandablePostByline_user
+}
+
+fragment CardByline_user on User {
+  __typename
+  id
+  name
+  username
+  mediumMemberAt
+  socialStats {
+    followerCount
+    __typename
+  }
+  ...useIsVerifiedBookAuthor_user
+  ...userUrl_user
+  ...UserMentionTooltip_user
+}
+
+fragment UserMentionTooltip_user on User {
+  id
+  name
+  username
+  bio
+  imageId
+  mediumMemberAt
+  membership {
+    tier
+    __typename
+    id
+  }
+  ...UserAvatar_user
+  ...UserFollowButton_user
+  ...useIsVerifiedBookAuthor_user
+  __typename
+}
+
+fragment ExpandablePostByline_user on User {
+  __typename
+  id
+  name
+  imageId
+  ...userUrl_user
+  ...useIsVerifiedBookAuthor_user
+}
+
+fragment PostPreviewByLine_collection on Collection {
+  id
+  __typename
+  ...CardByline_collection
+  ...CollectionLinkWithPopover_collection
+}
+
+fragment CardByline_collection on Collection {
+  name
+  ...collectionUrl_collection
+  __typename
+  id
+}
+
+fragment collectionUrl_collection on Collection {
+  id
+  domain
+  slug
+  __typename
+}
+
+fragment CollectionLinkWithPopover_collection on Collection {
+  ...collectionUrl_collection
+  ...CollectionTooltip_collection
+  __typename
+  id
+}
+
+fragment CollectionTooltip_collection on Collection {
+  id
+  name
+  description
+  subscriberCount
+  ...CollectionAvatar_collection
+  ...CollectionFollowButton_collection
+  __typename
+}
+
+fragment CollectionAvatar_collection on Collection {
+  name
+  avatar {
+    id
+    __typename
+  }
+  ...collectionUrl_collection
+  __typename
+  id
+}
+
+fragment CollectionFollowButton_collection on Collection {
+  __typename
+  id
+  name
+  slug
+  ...collectionUrl_collection
+  ...SusiClickable_collection
+}
+
+fragment SusiClickable_collection on Collection {
+  ...SusiContainer_collection
+  __typename
+  id
+}
+
+fragment SusiContainer_collection on Collection {
+  name
+  ...SignInOptions_collection
+  ...SignUpOptions_collection
+  __typename
+  id
+}
+
+fragment SignInOptions_collection on Collection {
+  id
+  name
+  __typename
+}
+
+fragment SignUpOptions_collection on Collection {
+  id
+  name
+  __typename
+}
+
+fragment CardByline_post on Post {
+  ...DraftStatus_post
+  ...Star_post
+  ...shouldShowPublishedInStatus_post
+  __typename
+  id
+}
+
+fragment DraftStatus_post on Post {
+  id
+  pendingCollection {
+    id
+    creator {
+      id
+      __typename
+    }
+    ...BoldCollectionName_collection
+    __typename
+  }
+  statusForCollection
+  creator {
+    id
+    __typename
+  }
+  isPublished
+  __typename
+}
+
+fragment BoldCollectionName_collection on Collection {
+  id
+  name
+  __typename
+}
+
+fragment Star_post on Post {
+  id
+  creator {
+    id
+    __typename
+  }
+  __typename
+}
+
+fragment shouldShowPublishedInStatus_post on Post {
+  statusForCollection
+  isPublished
+  __typename
+  id
+}
+
+fragment PostPreviewInformation_post on Post {
+  readingTime
+  isLocked
+  ...Star_post
+  ...usePostPublishedAt_post
+  __typename
+  id
+}
+
+fragment PostPreviewContainer_post on Post {
+  id
+  extendedPreviewContent {
+    isFullContent
+    __typename
+  }
+  visibility
+  pinnedAt
+  ...PostScrollTracker_post
+  ...usePostUrl_post
+  __typename
+}
+
+fragment PostScrollTracker_post on Post {
+  id
+  collection {
+    id
+    __typename
+  }
+  sequence {
+    sequenceId
+    __typename
+  }
+  __typename
+}
+
+fragment usePostUrl_post on Post {
+  id
+  creator {
+    ...userUrl_user
+    __typename
+    id
+  }
+  collection {
+    id
+    domain
+    slug
+    __typename
+  }
+  isSeries
+  mediumUrl
+  sequence {
+    slug
+    __typename
+  }
+  uniqueSlug
+  __typename
+}
+
+fragment SearchCollections_collections on SearchCollection {
+  items {
+    id
+    algoliaObjectId
+    ...CollectionFollowInline_collection
+    __typename
+  }
+  queryId
+  __typename
+}
+
+fragment CollectionFollowInline_collection on Collection {
+  id
+  name
+  domain
+  shortDescription
+  slug
+  ...CollectionAvatar_collection
+  ...CollectionFollowButton_collection
+  __typename
+}
+
+fragment SearchLists_catalogs on SearchCatalog {
+  items {
+    id
+    algoliaObjectId
+    ...CatalogsListItem_catalog
+    __typename
+  }
+  queryId
+  __typename
+}
+
+fragment CatalogsListItem_catalog on Catalog {
+  id
+  name
+  predefined
+  visibility
+  creator {
+    imageId
+    name
+    ...userUrl_user
+    ...useIsVerifiedBookAuthor_user
+    __typename
+    id
+  }
+  ...getCatalogSlugId_Catalog
+  ...formatItemsCount_catalog
+  ...CatalogsListItemCovers_catalog
+  ...CatalogContentMenu_catalog
+  ...SaveCatalogButton_catalog
+  __typename
+}
+
+fragment getCatalogSlugId_Catalog on Catalog {
+  id
+  name
+  __typename
+}
+
+fragment formatItemsCount_catalog on Catalog {
+  postItemsCount
+  __typename
+  id
+}
+
+fragment CatalogsListItemCovers_catalog on Catalog {
+  listItemsConnection: itemsConnection(pagingOptions: {limit: 10}) {
+    items {
+      catalogItemId
+      ...PreviewCatalogCovers_catalogItemV2
+      __typename
+    }
+    __typename
+  }
+  __typename
+  id
+}
+
+fragment PreviewCatalogCovers_catalogItemV2 on CatalogItemV2 {
+  catalogItemId
+  entity {
+    __typename
+    ... on Post {
+      visibility
+      previewImage {
+        id
+        alt
+        __typename
+      }
+      __typename
+      id
+    }
+  }
+  __typename
+}
+
+fragment CatalogContentMenu_catalog on Catalog {
+  creator {
+    ...userUrl_user
+    __typename
+    id
+  }
+  ...CatalogContentNonCreatorMenu_catalog
+  ...CatalogContentCreatorMenu_catalog
+  __typename
+  id
+}
+
+fragment CatalogContentNonCreatorMenu_catalog on Catalog {
+  id
+  viewerEdge {
+    clapCount
+    __typename
+    id
+  }
+  ...catalogUrl_catalog
+  __typename
+}
+
+fragment catalogUrl_catalog on Catalog {
+  id
+  predefined
+  ...getCatalogSlugId_Catalog
+  creator {
+    ...userUrl_user
+    __typename
+    id
+  }
+  __typename
+}
+
+fragment CatalogContentCreatorMenu_catalog on Catalog {
+  id
+  visibility
+  name
+  description
+  type
+  postItemsCount
+  predefined
+  disallowResponses
+  creator {
+    ...userUrl_user
+    __typename
+    id
+  }
+  ...UpdateCatalogDialog_catalog
+  ...catalogUrl_catalog
+  __typename
+}
+
+fragment UpdateCatalogDialog_catalog on Catalog {
+  id
+  name
+  description
+  visibility
+  type
+  __typename
+}
+
+fragment SaveCatalogButton_catalog on Catalog {
+  id
+  creator {
+    id
+    username
+    __typename
+  }
+  viewerEdge {
+    id
+    isFollowing
+    __typename
+  }
+  ...getCatalogSlugId_Catalog
+  __typename
+}
